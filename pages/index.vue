@@ -1,72 +1,52 @@
 <template>
-  <div class="container">
+  <div class="mt-50">
+    <el-row>
+      <el-col class="text-center">
+        <el-button @click="openClick()">게임 시작</el-button>
+      </el-col>
+    </el-row>
+    <hr>
     <div>
-      <logo />
-      <h1 class="title">
-        vingo
-      </h1>
-      <h2 class="subtitle">
-        My remarkable Nuxt.js project
-      </h2>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
+      <el-button v-for="i in 25" :key="i" :disabled="clickable">
+        <!-- {{initBoard[i-1]}} -->
+        {{i}}
+      </el-button>
     </div>
   </div>
 </template>
-
 <script>
-import Logo from '~/components/Logo.vue'
-
 export default {
-  components: {
-    Logo
+  data() {
+    return {
+      // initBoard : []
+      clickable : false
+    }
+  },
+  mounted() {
+    // this.initNumber()
+  },
+  methods: {
+    // initNumber() {
+    //   // let no = Math.floor(Math.random() * 25) + 1;
+    //   // for(let i=0; i<25; i++) {
+    //   //   this.initBoard[i]= i + 1
+    //   // }
+    //   // console.log(this.initBoard)
+    // }
+    openClick() {
+      this.clickable = !this.clickable
+    }
   }
 }
 </script>
-
-<style>
-.container {
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
-}
+<style lang="css">
+  hr {
+    margin: 10px 0
+  }
+  .mt-50 {
+    margin-top: 50px
+  }
+  .text-center {
+    text-align: center
+  }
 </style>

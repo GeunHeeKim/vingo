@@ -15,26 +15,26 @@
       <el-col :span="12">
         <h3 class="text-center">1 PLAYER</h3>
         <div class="wrap-board">
-          <el-button v-for="(number,i) in playerBoard1"
+          <button v-for="(number,i) in playerBoard1"
             :key="i"
             :disabled="!player1"
             :id="`p1_${i+1}`"
             @click="selectNumber($event,i,number)">
             {{playerBoard1[i]}}
-          </el-button>
+          </button>
         </div>
       </el-col>
       <!-- 2 player -->
       <el-col :span="12">
         <h3 class="text-center">2 PLAYER</h3>
         <div class="wrap-board">
-          <el-button v-for="(number,i) in playerBoard2"
+          <button v-for="(number,i) in playerBoard2"
             :key="i"
             :disabled="player1"
             :id="`p2_${i+1}`"
             @click="selectNumber($event,i,number)">
             {{playerBoard2[i]}}
-          </el-button>
+          </button>
         </div>
       </el-col>
     </el-row>
@@ -86,22 +86,38 @@ export default {
       this.updateBingo($event,i,n),
       this.changePlayer()
     },
-    updateBingo($event,i,n) {
+    async updateBingo($event,i,n) {
       //get id
       //get number
       let position = i + 1
       let selfNumber = n
-      console.log('player1','id:',position, 'no:',selfNumber)
+      // console.log('player1','id:',position, 'no:',selfNumber)
 
 
       //다른 플레이어 숫자판의 number 찾기
-      let p2Id = this.playerBoard2.findIndex((el) => el === selfNumber)
-      console.log(p2Id + 1)
-
       //다른 플레이어 숫자판의 id 찾기
+
+      let p2Id = (this.playerBoard2.findIndex((el) => el === selfNumber)) + 1
+      // let p2Id = await this.findOther(selfNumber)
+      let p2El = `p2_${p2Id}`
+      // let p2ElResult = this.$refs.p2El
+      let p2ElResult = document.getElementById(p2El)
+      // console.log(p2ElResult)
+      // 다른 플레이어 아이디값의 요소 찾기
+      // setTimeout(this.findOther(p2Id), 5000)
+      p2ElResult.classList.add('el-button--success')
+
       //css class추가
+      $event.target.classList.add('el-button--success')
+
       //다신 클릭못하게 하기
     },
+    // findOther(selfNumber) {
+    //   return (this.playerBoard2.findIndex((el) => el === selfNumber)) + 1
+    //   // let p2El = `p2_${p2Id}`
+    //   // let p2ElResult = this.$refs.p2El
+    //   // console.log(p2ElResult)
+    // },
     openClick() {
       this.clickable = !this.clickable
     },
@@ -123,6 +139,14 @@ export default {
 <style lang="css">
   h3 {
     margin: 50px 0px 15px 10%
+  }
+  button {
+    line-height: 2;
+    font-size: 14px;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    outline: 0
   }
   .mt-50 {
     margin-top: 50px

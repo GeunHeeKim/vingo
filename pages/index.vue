@@ -14,6 +14,7 @@
       <!-- 1 player -->
       <el-col :span="12">
         <h3 class="text-center">1 PLAYER</h3>
+        <div class="text-center"><b>{{pointPlayer1}} 줄</b>이 완성되었습니다.</div>
         <div class="wrap-board">
           <button v-for="(number,i) in playerBoard1"
             :key="i"
@@ -27,6 +28,7 @@
       <!-- 2 player -->
       <el-col :span="12">
         <h3 class="text-center">2 PLAYER</h3>
+        <div class="text-center"><b>{{pointPlayer2}} 줄</b>이 완성되었습니다.</div>
         <div class="wrap-board">
           <button v-for="(number,i) in playerBoard2"
             :key="i"
@@ -48,8 +50,10 @@ export default {
       playerBoard2 : [],
       clickable : false,
       player1: true,
-      binghPlayer1: [],
-      binghPlayer2: [],
+      bingoPlayer1: [],
+      bingoPlayer2: [],
+      pointPlayer1 : 0,
+      pointPlayer2: 0,
       bingoArray : [
         [1, 2, 3, 4, 5],
         [6, 7, 8, 9, 10],
@@ -83,41 +87,77 @@ export default {
       this.shuffleBoard(this.playerBoard2)
     },
     selectNumber($event,i,n) {
-      this.updateBingo($event,i,n),
+      this.markNumber($event,i,n)
       this.changePlayer()
     },
-    async updateBingo($event,i,n) {
-      //get id
-      //get number
-      let position = i + 1
-      let selfNumber = n
-      // console.log('player1','id:',position, 'no:',selfNumber)
+    markNumber($event,i,n) {
+      // 다른 플레이어 판의 값 변경할수있게 if 처리하기
+      let player = '1'
+      let otherPlayer = '2'
+      let otherId = (this.playerBoard2.findIndex((el) => el === n)) + 1
+      if($event.target.id.includes('p2')) {
+        player = '2'
+        otherPlayer = '1'
+        otherId = (this.playerBoard1.findIndex((el) => el === n)) + 1
+      }
 
-
-      //다른 플레이어 숫자판의 number 찾기
-      //다른 플레이어 숫자판의 id 찾기
-
-      let p2Id = (this.playerBoard2.findIndex((el) => el === selfNumber)) + 1
-      // let p2Id = await this.findOther(selfNumber)
-      let p2El = `p2_${p2Id}`
-      // let p2ElResult = this.$refs.p2El
-      let p2ElResult = document.getElementById(p2El)
-      // console.log(p2ElResult)
-      // 다른 플레이어 아이디값의 요소 찾기
-      // setTimeout(this.findOther(p2Id), 5000)
-      p2ElResult.classList.add('el-button--success')
+      //다른 플레이어 숫자판의 number,id ,아이디값의 요소찾기
+      let otherEl = `p${otherPlayer}_${otherId}`
+      let otherResult = document.getElementById(otherEl)
+      this.addBingo($event, i, n, player, otherPlayer, otherId)
 
       //css class추가
+      otherResult.classList.add('el-button--success')
       $event.target.classList.add('el-button--success')
 
       //다신 클릭못하게 하기
     },
-    // findOther(selfNumber) {
-    //   return (this.playerBoard2.findIndex((el) => el === selfNumber)) + 1
-    //   // let p2El = `p2_${p2Id}`
-    //   // let p2ElResult = this.$refs.p2El
-    //   // console.log(p2ElResult)
-    // },
+    //정답 보드에 추가하기
+    addBingo($event,i,n,player,otherPlayer, otherId) {
+      let locationNo = i + 1
+      if(otherPlayer === '2') {
+        this.bingoPlayer1.push(locationNo)
+        this.bingoPlayer2.push(otherId)
+      } else {
+        this.bingoPlayer2.push(locationNo)
+        this.bingoPlayer1.push(otherId)
+      }
+      this.checkBingo(player,otherPlayer)
+    },
+    checkBingo(player,otherPlayer) {
+      //정답 비교하기
+      if(otherPlayer === '2') {
+        this.player1Check(player)
+        this.player2Check(otherPlayer)
+      } else {
+        this.player1Check(otherPlayer)
+        this.player2Check(player)
+      }
+    },
+    player1Check(player) {
+      this.pointPlayer1 = 0
+      for (let i = 0; i < this.bingoArray.length; i++) {
+          if (
+              this.bingoArray[i].every(
+                  j => this.bingoPlayer1.includes(j)
+              )
+          ) {
+            this.pointPlayer1 += 1
+          }
+      }
+    },
+    player2Check(otherPlayer) {
+      this.pointPlayer2 = 0
+      for (let i = 0; i < this.bingoArray.length; i++) {
+          if (
+              this.bingoArray[i].every(
+                  j => this.bingoPlayer2.includes(j)
+              )
+          ) {
+            this.pointPlayer2 += 1
+          }
+      }
+    },
     openClick() {
       this.clickable = !this.clickable
     },

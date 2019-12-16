@@ -18,6 +18,7 @@
         <div class="wrap-board">
           <div class="block" v-show="!player1"></div>
           <button v-for="(number,i) in playerBoard1"
+            class="clikable-number"
             :key="i"
             :id="`p1_${i+1}`"
             ref="number"
@@ -33,6 +34,7 @@
         <div class="wrap-board">
           <div class="block" v-show="!player2"></div>
           <button v-for="(number,i) in playerBoard2"
+            class="clikable-number"
             :key="i"
             ref="number"
             :id="`p2_${i+1}`"
@@ -42,12 +44,23 @@
         </div>
       </el-col>
     </el-row>
+    <el-dialog
+      title="Tips"
+      :visible.sync="dialogVisible"
+      width="30%">
+      <span>{{resultText}}</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="confirmResult()">확인</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
 export default {
   data() {
     return {
+      resultText: '',
+      dialogVisible: false,
       playerBoard1 : [],
       playerBoard2 : [],
       clickable : false,
@@ -89,10 +102,10 @@ export default {
       this.shuffleBoard(this.playerBoard1)
       this.shuffleBoard(this.playerBoard2)
       this.player1 = true
-      // let allBtns = (this.$el.querySelectorAll('button'))
-      // allBtns.forEach(element => {
-      //   element
-      // });
+      this.clickable = true
+      this.clearData()
+    },
+    clearData() {
       this.playerBoard2.forEach(e => {
         let ghgh = `p2_${e}`
         let js = document.getElementById(ghgh)
@@ -105,7 +118,8 @@ export default {
       })
       this.bingoPlayer1 = []
       this.bingoPlayer2 = []
-      this.clickable = true
+      this.pointPlayer1 = 0
+      this.pointPlayer2 = 0
     },
     selectNumber($event,i,n) {
       this.markNumber($event,i,n)
@@ -113,6 +127,7 @@ export default {
     },
     //선택한 번호를 화면에서 녹색으로 표시
     markNumber($event,i,n) {
+      $event.target.disabled = true
       let player = '1'
       let otherPlayer = '2'
       let otherId = (this.playerBoard2.findIndex((el) => el === n)) + 1
@@ -124,10 +139,8 @@ export default {
       //다른 플레이어 숫자판의 number,id ,아이디값의 요소찾기
       let otherEl = `p${otherPlayer}_${otherId}`
       let otherResult = document.getElementById(otherEl)
-      $event.target.disabled = true
       otherResult.disabled = true
       this.addBingo($event, i, n, player, otherPlayer, otherId)
-      // setTimeout(this.addBingo($event, i, n, player, otherPlayer, otherId), 1000)
 
     },
     //각 플레이어의 정답 배열에 숫자 추가하기
@@ -146,9 +159,11 @@ export default {
       if(otherPlayer === '2') {
         this.player1Check(player)
         this.player2Check(otherPlayer)
+        this.result()
       } else {
         this.player1Check(otherPlayer)
         this.player2Check(player)
+        this.result()
       }
     },
     player1Check(player) {
@@ -160,12 +175,6 @@ export default {
               )
           ) {
             this.pointPlayer1 += 1
-            if(this.pointPlayer1 === 5) {
-              if(this.pointPlayer2 === 5)  {
-                alert('무승부입니다.')
-              }
-              alert('PLAYER 1 Win!')
-            }
           }
       }
     },
@@ -178,13 +187,24 @@ export default {
               )
           ) {
             this.pointPlayer2 += 1
-            if(this.pointPlayer2 === 5) {
-              if(this.pointPlayer1 === 5) {
-                alert('무승부입니다.')
-              }
-              alert('PLAYER 2 Win!')
-            }
           }
+      }
+    },
+    confirmResult() {
+      this.dialogVisible = false
+      this.initGame()
+      this.clickable = false
+    },
+    result() {
+      if(this.pointPlayer2 >= 5 && this.pointPlayer1 >= 5) {
+        this.resultText = '무승부입니다.'
+        this.dialogVisible = true
+      } else if(this.pointPlayer1 >= 5) {
+        this.resultText = 'PLAYER 1 Win!'
+        this.dialogVisible = true
+      } else if(this.pointPlayer2 >= 5) {
+        this.resultText = 'PLAYER 2 Win!'
+        this.dialogVisible = true
       }
     },
     startGame() {
@@ -214,8 +234,8 @@ export default {
   h3 {
     margin: 50px 0px 15px 4%
   }
-  button {
-    line-height: 4;
+  button.clikable-number {
+    line-height: 6;
     font-size: 14px;
     border-radius: 4px;
     background: #fff;
@@ -254,7 +274,7 @@ export default {
     border-radius: 5px;
     line-height: 2;
   }
-  button[disabled] {
+  button.clikable-number[disabled] {
     background-color: #67C23A;
     border-color: #67C23A;
     cursor:not-allowed;

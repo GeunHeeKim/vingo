@@ -16,10 +16,11 @@
         <h3 class="text-center">1 PLAYER</h3>
         <div class="text-center"><b>{{pointPlayer1}} 줄</b>이 완성되었습니다.</div>
         <div class="wrap-board">
+          <div class="block" v-show="!player1"></div>
           <button v-for="(number,i) in playerBoard1"
             :key="i"
-            :disabled="!player1"
             :id="`p1_${i+1}`"
+            ref="number"
             @click="selectNumber($event,i,number)">
             {{playerBoard1[i]}}
           </button>
@@ -30,9 +31,10 @@
         <h3 class="text-center">2 PLAYER</h3>
         <div class="text-center"><b>{{pointPlayer2}} 줄</b>이 완성되었습니다.</div>
         <div class="wrap-board">
+          <div class="block" v-show="!player2"></div>
           <button v-for="(number,i) in playerBoard2"
             :key="i"
-            :disabled="player1"
+            ref="number"
             :id="`p2_${i+1}`"
             @click="selectNumber($event,i,number)">
             {{playerBoard2[i]}}
@@ -49,7 +51,8 @@ export default {
       playerBoard1 : [],
       playerBoard2 : [],
       clickable : false,
-      player1: true,
+      player1: false,
+      player2: false,
       bingoPlayer1: [],
       bingoPlayer2: [],
       pointPlayer1 : 0,
@@ -74,24 +77,42 @@ export default {
     this.initNumber()
   },
   methods: {
+    //각 플레이어 보드에 1 ~ 25 번호 채우기
     initNumber() {
-      // let no = Math.floor(Math.random() * 25) + 1;
       for(let i=0; i<25; i++) {
         this.playerBoard1[i]= i + 1
         this.playerBoard2[i]= i + 1
       }
     },
     initGame() {
-      this.openClick()
+      this.startGame()
       this.shuffleBoard(this.playerBoard1)
       this.shuffleBoard(this.playerBoard2)
+      this.player1 = true
+      // let allBtns = (this.$el.querySelectorAll('button'))
+      // allBtns.forEach(element => {
+      //   element
+      // });
+      this.playerBoard2.forEach(e => {
+        let ghgh = `p2_${e}`
+        let js = document.getElementById(ghgh)
+        js.disabled = false
+      })
+      this.playerBoard1.forEach(e => {
+        let ghgh = `p1_${e}`
+        let js = document.getElementById(ghgh)
+        js.disabled = false
+      })
+      this.bingoPlayer1 = []
+      this.bingoPlayer2 = []
+      this.clickable = true
     },
     selectNumber($event,i,n) {
       this.markNumber($event,i,n)
       this.changePlayer()
     },
+    //선택한 번호를 화면에서 녹색으로 표시
     markNumber($event,i,n) {
-      // 다른 플레이어 판의 값 변경할수있게 if 처리하기
       let player = '1'
       let otherPlayer = '2'
       let otherId = (this.playerBoard2.findIndex((el) => el === n)) + 1
@@ -100,19 +121,16 @@ export default {
         otherPlayer = '1'
         otherId = (this.playerBoard1.findIndex((el) => el === n)) + 1
       }
-
       //다른 플레이어 숫자판의 number,id ,아이디값의 요소찾기
       let otherEl = `p${otherPlayer}_${otherId}`
       let otherResult = document.getElementById(otherEl)
+      $event.target.disabled = true
+      otherResult.disabled = true
       this.addBingo($event, i, n, player, otherPlayer, otherId)
+      // setTimeout(this.addBingo($event, i, n, player, otherPlayer, otherId), 1000)
 
-      //css class추가
-      otherResult.classList.add('el-button--success')
-      $event.target.classList.add('el-button--success')
-
-      //다신 클릭못하게 하기
     },
-    //정답 보드에 추가하기
+    //각 플레이어의 정답 배열에 숫자 추가하기
     addBingo($event,i,n,player,otherPlayer, otherId) {
       let locationNo = i + 1
       if(otherPlayer === '2') {
@@ -125,7 +143,6 @@ export default {
       this.checkBingo(player,otherPlayer)
     },
     checkBingo(player,otherPlayer) {
-      //정답 비교하기
       if(otherPlayer === '2') {
         this.player1Check(player)
         this.player2Check(otherPlayer)
@@ -143,6 +160,12 @@ export default {
               )
           ) {
             this.pointPlayer1 += 1
+            if(this.pointPlayer1 === 5) {
+              if(this.pointPlayer2 === 5)  {
+                alert('무승부입니다.')
+              }
+              alert('PLAYER 1 Win!')
+            }
           }
       }
     },
@@ -155,14 +178,25 @@ export default {
               )
           ) {
             this.pointPlayer2 += 1
+            if(this.pointPlayer2 === 5) {
+              if(this.pointPlayer1 === 5) {
+                alert('무승부입니다.')
+              }
+              alert('PLAYER 2 Win!')
+            }
           }
       }
     },
-    openClick() {
+    startGame() {
       this.clickable = !this.clickable
+      this.bingoPlayer1 = []
+      this.bingoPlayer2 = []
+      this.player1 = false
+      this.player2 = false
     },
     changePlayer() {
       this.player1 = !this.player1
+      this.player2 = !this.player2
     },
     shuffleBoard(a) {
       let j, x, i
@@ -178,10 +212,10 @@ export default {
 </script>
 <style lang="css">
   h3 {
-    margin: 50px 0px 15px 10%
+    margin: 50px 0px 15px 4%
   }
   button {
-    line-height: 2;
+    line-height: 4;
     font-size: 14px;
     border-radius: 4px;
     background: #fff;
@@ -198,10 +232,19 @@ export default {
     text-align: center
   }
   .wrap-board {
+    position: relative;
+    margin-top: 5px;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-gap: 5px;
     /* grid-auto-rows: minmax(100px, auto); */
+  }
+  .wrap-board .block {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    background: rgba(0,0,0,0.2)
   }
   .info-text {
     text-align: center;
@@ -211,7 +254,10 @@ export default {
     border-radius: 5px;
     line-height: 2;
   }
-  .el-button--success {
-    cursor:not-allowed
+  button[disabled] {
+    background-color: #67C23A;
+    border-color: #67C23A;
+    cursor:not-allowed;
+    color: #fff
   }
 </style>
